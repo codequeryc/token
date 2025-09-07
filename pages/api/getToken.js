@@ -2,6 +2,15 @@
 import fetch from "node-fetch";
 
 export default async function handler(req, res) {
+  // ✅ CORS headers add karo
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end(); // 🔥 Preflight request ke liye
+  }
+
   try {
     const client_id = process.env.GOOGLE_CLIENT_ID;
     const client_secret = process.env.GOOGLE_CLIENT_SECRET;
@@ -14,8 +23,8 @@ export default async function handler(req, res) {
         client_id,
         client_secret,
         refresh_token,
-        grant_type: "refresh_token"
-      })
+        grant_type: "refresh_token",
+      }),
     });
 
     const data = await response.json();
@@ -26,7 +35,7 @@ export default async function handler(req, res) {
 
     res.status(200).json({
       access_token: data.access_token,
-      expires_in: data.expires_in
+      expires_in: data.expires_in,
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
